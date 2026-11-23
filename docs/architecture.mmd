@@ -1,3 +1,5 @@
+%% Semantic companion to architecture.svg, the Cloudflare-styled README diagram.
+%%{init: {"theme": "base", "themeVariables": {"background": "#FFFBF5", "primaryColor": "#FFFDFB", "primaryTextColor": "#521000", "primaryBorderColor": "#EBD5C1", "lineColor": "#FF4801", "secondaryColor": "#FEF7ED", "tertiaryColor": "#FFFBF5", "clusterBkg": "#FEF7ED", "clusterBorder": "#EBD5C1", "edgeLabelBackground": "#FFFBF5", "fontFamily": "-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif", "fontSize": "16px"}}}%%
 flowchart TB
   Client["Telnet client"] -->|"TCP :7777"| Ingress["Spectrum / local Wrangler TCP listener"]
   Ingress --> Worker["Cloudflare Worker<br/>connect(socket)"]
@@ -10,13 +12,13 @@ flowchart TB
   end
 
   Worker -->|"Byte streams over RPC"| Connections
-  Connections --> Runtime
-  Runtime --> Snapshots
+  Connections <-->|"Commands / output"| Runtime
+  Runtime -->|"Checkpoint before output"| Snapshots
 
-  classDef cfClient fill:#ff5e1f,stroke:#d63c01,color:#ffffff,stroke-width:2px;
-  classDef cfEngine fill:#ffffff,stroke:#ff5e1f,color:#262626,stroke-width:1.5px;
-  classDef cfCompute fill:#e6f4ff,stroke:#0a95ff,color:#083b63,stroke-width:2px;
-  classDef cfStorage fill:#ffe6fc,stroke:#ee0ddb,color:#63005b,stroke-width:2px;
+  classDef cfClient fill:#FFFDFB,stroke:#EBD5C1,color:#521000,stroke-width:1.5px,rx:12,ry:12;
+  classDef cfEngine fill:#FFFDFB,stroke:#FF4801,color:#521000,stroke-width:1.5px,rx:12,ry:12;
+  classDef cfCompute fill:#FFFDFB,stroke:#EBD5C1,color:#521000,stroke-width:1.5px,rx:12,ry:12;
+  classDef cfStorage fill:#FFFDFB,stroke:#EBD5C1,color:#521000,stroke-width:1.5px,rx:12,ry:12;
 
   class Client cfClient;
   class Ingress,Worker,Runtime cfEngine;

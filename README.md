@@ -1,23 +1,33 @@
 # Durable MOO
 
-LambdaMOO running as WebAssembly in a SQLite-backed Cloudflare Durable Object,
+Cloudflare now supports routing [TCP traffic to a Worker](https://developers.cloudflare.com/spectrum/how-to/route-tcp-traffic-to-a-worker/) with [Spectrum](https://developers.cloudflare.com/spectrum/), so of course we had to port an old-school [virtual reality universe](https://en.wikipedia.org/wiki/MOO) to Workers.
+
+Durable MOO is [LambdaMOO](https://developers.cloudflare.com/workers/runtime-apis/handlers/connect/) running as WebAssembly in a SQLite-backed Cloudflare Durable Object,
 with native [TCP Workers](https://developers.cloudflare.com/workers/runtime-apis/handlers/connect/)
 ingress. No Node networking shim, Zig proxy, WebSocket tunnel, or shared proxy
 token is required.
 
-Ported from `../cloudflaremoo` at `f36820da84cc095db3c1fb21bbb6d64fecf3a572`.
-The LambdaMOO C runtime, Wasm adapters, and snapshot format are preserved.
+- 🔌 Native [TCP Workers](https://developers.cloudflare.com/workers/runtime-apis/handlers/connect/) ingress for Telnet clients.
+- 🌍 A shared multiplayer world in a Durable Object.
+- 🐄 [LambdaMOO](https://developers.cloudflare.com/workers/runtime-apis/handlers/connect/) compiled to WebAssembly.
+- 💾 [SQLite snapshots](https://developers.cloudflare.com/durable-objects/api/sqlite-storage-api/) persisted before command output.
+- ⏰ Durable Object [alarms](https://developers.cloudflare.com/durable-objects/api/alarms/) for scheduled MOO tasks.
+- 🛠️ Local development with [Wrangler](https://developers.cloudflare.com/workers/wrangler/)
+
+## Try it
+
+I have deployed Durable Moo at `moo.celso.io:7777`, try it:
+
+```bash
+telnet moo.celso.io 7777
+```
+
+![DurableMoo Terminal Screenshot](docs/durable-moo-terminal.png)
+
 
 ## Architecture
 
-```mermaid
-flowchart TB
-  Client[Telnet client] -->|TCP :7777| Spectrum[Spectrum / local Wrangler TCP listener]
-  Spectrum --> Worker[Worker connect handler]
-  Worker -->|ReadableStream + WritableStream over RPC| World[GameWorld Durable Object]
-  World --> Runtime[LambdaMOO WebAssembly]
-  World --> Storage[SQLite snapshot generations]
-```
+![Durable MOO architecture: Telnet clients connect through Spectrum or local Wrangler to the native Worker TCP handler. Byte streams pass over RPC to player sessions in a GameWorld Durable Object, where LambdaMOO runs as WebAssembly and checkpoints to SQLite before releasing output.](docs/architecture.svg)
 
 All connections route to the `default` world. The handler awaits the entire
 session RPC, keeping the TCP socket alive. Each session has line framing, basic
@@ -90,7 +100,7 @@ The Worker URL is HTTP-only: connecting to `workers.dev:7777` or sending HTTP
 `CONNECT` does **not** invoke the TCP handler. For public TCP:
 
 1. Use a Cloudflare-authoritative Pro/Business zone, or a zone with Spectrum
-   Enterprise, in the same account as the Worker. Free zones are unsupported.
+   Enterprise, in the same account as the Worker.
 2. Create a Spectrum application with **Workers (tcp)** (or **TCP → Worker**
    for Spectrum Enterprise) and select the deployed `durable-moo` Worker.
 3. Choose a hostname (for example, `moo.example.com`) and edge port `7777`.

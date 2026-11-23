@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="544" viewBox="0 176 1120 544" role="img" aria-labelledby="title description">
+  <title id="title">Durable MOO architecture</title>
+  <desc id="description">Telnet clients connect over TCP port 7777 through Spectrum in production or Wrangler locally. A Worker's native connect handler transfers readable and writable byte streams over RPC to active sessions in the default GameWorld Durable Object. Sessions exchange commands and output with the LambdaMOO WebAssembly runtime. The runtime checkpoints to SQLite before releasing output.</desc>
+  <defs>
+    <pattern id="dots" width="16" height="16" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="0.8" fill="#EBD5C1"/>
+    </pattern>
+    <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M1 1 L7 4 L1 7" fill="none" stroke="#FF4801" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <g id="corner">
+      <rect x="-4" y="-4" width="8" height="8" rx="1.5" fill="#FFFBF5" stroke="#EBD5C1"/>
+    </g>
+    <style>
+      text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; fill: #521000; font-weight: 400; }
+      .heading { font-size: 22px; font-weight: 500; letter-spacing: -0.44px; }
+      .body { font-size: 15px; }
+      .muted { fill: #865C4D; }
+      .mono { font-family: 'SF Mono', Consolas, monospace; font-size: 12px; }
+      .card { fill: #FFFDFB; stroke: #EBD5C1; }
+      .wire { fill: none; stroke: #FF4801; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+      .icon { fill: none; stroke: #FF4801; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <rect y="176" width="1120" height="544" rx="16" fill="#FFFBF5"/>
+  <rect x="24" y="192" width="1072" height="512" rx="16" fill="url(#dots)"/>
+
+  <!-- Public TCP ingress, read from left to right. -->
+  <g transform="translate(48 208)">
+    <rect width="240" height="128" rx="12" class="card"/>
+    <use href="#corner"/><use href="#corner" x="240"/><use href="#corner" y="128"/><use href="#corner" x="240" y="128"/>
+    <g class="icon" transform="translate(24 20)">
+      <rect width="28" height="22" rx="4"/>
+      <path d="M7 7 L11 11 L7 15 M16 15 H21"/>
+    </g>
+    <text x="24" y="76" class="heading">Telnet client</text>
+    <text x="24" y="104" class="body muted">Connect. Explore. Build.</text>
+  </g>
+  <path d="M300 272 H380" class="wire" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+  <text x="340" y="252" text-anchor="middle" class="mono muted">TCP :7777</text>
+
+  <g transform="translate(392 208)">
+    <rect width="288" height="128" rx="12" class="card"/>
+    <use href="#corner"/><use href="#corner" x="288"/><use href="#corner" y="128"/><use href="#corner" x="288" y="128"/>
+    <g class="icon" transform="translate(24 20)">
+      <path d="M4 21 H25 A6 6 0 0 0 25 9 A9 9 0 0 0 8 7 A7 7 0 0 0 4 21 Z"/>
+    </g>
+    <text x="24" y="76" class="heading">TCP ingress</text>
+    <text x="24" y="104" class="body muted">Spectrum / local Wrangler</text>
+  </g>
+  <path d="M692 272 H772" class="wire" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+  <text x="732" y="252" text-anchor="middle" class="mono muted">socket</text>
+
+  <g transform="translate(784 208)">
+    <rect width="288" height="128" rx="12" class="card"/>
+    <use href="#corner"/><use href="#corner" x="288"/><use href="#corner" y="128"/><use href="#corner" x="288" y="128"/>
+    <g class="icon" transform="translate(24 20)">
+      <path d="M15 0 L4 14 H14 L11 26 L25 10 H15 Z"/>
+    </g>
+    <text x="24" y="76" class="heading">Cloudflare Worker</text>
+    <text x="24" y="104" class="mono muted">connect(socket)</text>
+  </g>
+
+  <!-- One coordination boundary contains sessions, runtime, and storage. -->
+  <rect x="48" y="440" width="1024" height="248" rx="16" fill="#FEF7ED" stroke="#EBD5C1" stroke-dasharray="6 6"/>
+  <use href="#corner" x="48" y="440"/><use href="#corner" x="1072" y="440"/>
+  <use href="#corner" x="48" y="688"/><use href="#corner" x="1072" y="688"/>
+  <!-- The socket lives for the entire awaited session RPC. -->
+  <path d="M928 348 V516" class="wire" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+  <rect x="824" y="364" width="208" height="48" rx="24" fill="#FFFBF5" stroke="#EBD5C1"/>
+  <text x="928" y="384" text-anchor="middle" class="mono">Byte streams over RPC</text>
+  <text x="928" y="400" text-anchor="middle" class="mono muted">readable + writable</text>
+  <text x="80" y="480" class="heading">GameWorld Durable Object</text>
+  <rect x="416" y="460" width="152" height="28" rx="14" fill="#FFFBF5" stroke="#EBD5C1"/>
+  <circle cx="432" cy="474" r="3" fill="#FF4801"/>
+  <text x="444" y="478" class="mono muted">world: default</text>
+
+  <!-- The flow continues from right to left inside the world. -->
+  <g transform="translate(784 528)">
+    <rect width="256" height="128" rx="12" class="card"/>
+    <use href="#corner"/><use href="#corner" x="256"/><use href="#corner" y="128"/><use href="#corner" x="256" y="128"/>
+    <g class="icon" transform="translate(24 20)">
+      <circle cx="9" cy="6" r="4"/><path d="M1 24 V20 A8 8 0 0 1 17 20 V24 M21 3 A4 4 0 0 1 21 11 M25 24 V20 A8 8 0 0 0 22 14"/>
+    </g>
+    <text x="24" y="76" class="heading">Player sessions</text>
+    <text x="24" y="104" class="body muted">Framing + bounded output</text>
+  </g>
+  <path d="M772 592 H732" class="wire" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+  <text x="752" y="572" text-anchor="middle" class="mono muted">I/O</text>
+
+  <g transform="translate(400 528)">
+    <rect width="320" height="128" rx="12" fill="#FFFDFB" stroke="#FF4801"/>
+    <use href="#corner"/><use href="#corner" x="320"/><use href="#corner" y="128"/><use href="#corner" x="320" y="128"/>
+    <g class="icon" transform="translate(24 20)">
+      <rect x="3" y="3" width="22" height="22" rx="4"/>
+      <path d="M9 9 H19 V19 H9 Z M9 0 V3 M19 0 V3 M9 25 V28 M19 25 V28 M0 9 H3 M0 19 H3 M25 9 H28 M25 19 H28"/>
+    </g>
+    <text x="24" y="76" class="heading">LambdaMOO · Wasm</text>
+    <text x="24" y="104" class="body muted">Objects, verbs, heap + task scheduler</text>
+  </g>
+  <path d="M388 592 H348" class="wire" marker-end="url(#arrow)"/>
+  <text x="368" y="572" text-anchor="middle" class="mono muted">save</text>
+
+  <g transform="translate(80 528)">
+    <rect width="256" height="128" rx="12" class="card"/>
+    <use href="#corner"/><use href="#corner" x="256"/><use href="#corner" y="128"/><use href="#corner" x="256" y="128"/>
+    <g class="icon" transform="translate(24 20)">
+      <ellipse cx="14" cy="5" rx="12" ry="4"/>
+      <path d="M2 5 V21 C2 27 26 27 26 21 V5 M2 13 C2 19 26 19 26 13"/>
+    </g>
+    <text x="24" y="76" class="heading">SQLite snapshots</text>
+    <text x="24" y="104" class="body muted">Chunked + atomic generations</text>
+  </g>
+</svg>
