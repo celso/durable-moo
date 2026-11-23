@@ -15,7 +15,7 @@ proxy token is required.
 - ⏰ Durable Object [alarms](https://developers.cloudflare.com/durable-objects/api/alarms/) for scheduled MOO tasks.
 - 🛠️ Local development with [Wrangler](https://developers.cloudflare.com/workers/wrangler/)
 
-## Try it
+## Try it live
 
 I have deployed Durable Moo at `moo.celso.io:7777`, try it:
 
@@ -24,6 +24,10 @@ telnet moo.celso.io 7777
 ```
 
 ![DurableMoo Terminal Screenshot](docs/durable-moo-terminal.png)
+
+*You may have to `brew install telnet`, or equivalent, first, since modern distros don't bundle the command anymore*
+
+Or go to https://moo-web.celso.io for a telnet-emulated web version if you're feeling lazy.
 
 
 ## Architecture
