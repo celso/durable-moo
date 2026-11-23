@@ -31,3 +31,6 @@ moo
 /.wrangler/
 /.dev.vars*
 /.env*
+/dist/
+/playwright-report/
+/test-results/

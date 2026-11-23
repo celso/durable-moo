@@ -1,6 +1,9 @@
 import { DurableObject } from "cloudflare:workers";
 import { TcpSession } from "./tcp-session";
 import { TelnetLines } from "./telnet";
+import { WebSocketSession } from "./websocket-session";
+import { secureAssetResponse, validateWebSocketRequest } from "./http";
+import type { SessionSocket } from "./session-socket";
 
 import seedDatabase from "../lambdamoo/LambdaCore-17May04.db";
 import mooModule from "../lambdamoo/dist/lambdamoo.wasm";
@@ -24,7 +27,7 @@ interface MooExports extends WebAssembly.Exports {
 }
 
 interface ConnectionState {
-  socket: TcpSession;
+  socket: SessionSocket;
   lines: TelnetLines;
 }
 
@@ -53,6 +56,27 @@ export class GameWorld extends DurableObject<Env> {
       (data) => this.receive(id, data),
       () => this.disconnect(id),
     );
+  }
+
+  async fetch(request: Request): Promise<Response> {
+    const invalid = validateWebSocketRequest(request);
+    if (invalid) return invalid;
+    await this.ready;
+    const [client, server] = Object.values(new WebSocketPair());
+    server.binaryType = "arraybuffer";
+    // Standard sockets deliberately keep the in-memory Wasm world awake, just
+    // like TCP sessions. Hibernation would require restoring live MOO sessions.
+    server.accept();
+    const id = crypto.randomUUID();
+    const socket = new WebSocketSession(server, (data) => this.receive(id, data), () => this.disconnect(id));
+    this.connections.set(id, { socket, lines: new TelnetLines() });
+    try {
+      this.mutate(() => this.withCString(id, (pointer) => this.runtime.moo_connect(pointer)));
+    } catch (error) {
+      socket.end();
+      throw error;
+    }
+    return new Response(null, { status: 101, webSocket: client });
   }
 
   async alarm(): Promise<void> {
@@ -258,5 +282,13 @@ export default {
       await socket.close().catch(() => {});
     }
   },
-  fetch: () => new Response("LambdaMOO TCP ingress is ready."),
+  async fetch(request, env): Promise<Response> {
+    const url = new URL(request.url);
+    if (url.pathname === "/ws") {
+      const invalid = validateWebSocketRequest(request);
+      return invalid ?? env.GAME_WORLD.getByName("default").fetch(request);
+    }
+    if (url.pathname === "/healthz") return new Response("LambdaMOO TCP ingress is ready.");
+    return secureAssetResponse(await env.ASSETS.fetch(request));
+  },
 } satisfies ExportedHandler<Env>;

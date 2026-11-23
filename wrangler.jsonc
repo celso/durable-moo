@@ -4,6 +4,12 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-11-23",
   "connect": [{ "protocol": "tcp", "port": 7777 }],
+  "build": { "command": "pnpm run build:web", "watch_dir": "./web" },
+  "assets": {
+    "directory": "./dist/web",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
   "rules": [
     { "type": "Data", "globs": ["**/*.db"], "fallthrough": true }
   ],
