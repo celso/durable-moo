@@ -123,7 +123,7 @@ async function start(): Promise<void> {
       const command = line.trim().toLowerCase();
       if (["q", "quit", "close"].includes(command)) socket.close(1000, "Disconnected by player");
       else if (!command) telnetMode = false;
-      else if (command === "status") terminal.write(`Connected to ${location.hostname}.\r\n`);
+      else if (command === "status") terminal.write("Connected to localhost.\r\n");
       else terminal.write("Commands: close, quit, status, help. Press Enter on an empty line to return to the world.\r\n");
     } else socket.send(encoder.encode(line + "\n"));
     resetInput();
@@ -211,7 +211,7 @@ async function start(): Promise<void> {
     connection.disabled = true;
     connection.textContent = "Connecting…";
     // Cosmetic telnet transcript: the actual transport remains same-origin WS.
-    terminal.write(`❯ telnet ${location.hostname} 7777\r\nTrying ${location.hostname}...\r\n`);
+    terminal.write("❯ telnet localhost 7777\r\nTrying localhost...\r\n");
     const url = new URL("/ws", location.href);
     url.protocol = location.protocol === "https:" ? "wss:" : "ws:";
     const current = new WebSocket(url);
@@ -230,7 +230,7 @@ async function start(): Promise<void> {
       input.disabled = false;
       connection.textContent = "Disconnect";
       connection.disabled = false;
-      terminal.write(`Connected to ${location.hostname}.\r\nEscape character is '^]'.\r\n\r\n`);
+      terminal.write("Connected to localhost.\r\nEscape character is '^]'.\r\n\r\n");
       drawPrompt();
       // Do not summon a mobile keyboard until the player taps the terminal.
       if (matchMedia("(pointer: fine)").matches) input.focus({ preventScroll: true });

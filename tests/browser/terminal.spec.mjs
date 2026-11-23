@@ -20,8 +20,9 @@ test("self-hosted Rioterm loads, logs in, edits commands, quits, and reconnects"
   await page.goto("/");
   await expect(page.getByRole("status")).toHaveText("Connected");
   await expect(page.locator("#terminal")).toContainText("Welcome to the LambdaCore database");
-  await expect(page.locator("#terminal")).toContainText("❯ telnet 127.0.0.1 7777");
-  await expect(page.locator("#terminal")).toContainText("Trying 127.0.0.1...");
+  await expect(page.locator("#terminal")).toContainText("❯ telnet localhost 7777");
+  await expect(page.locator("#terminal")).toContainText("Trying localhost...");
+  await expect(page.locator("#terminal")).toContainText("Connected to localhost.");
   await expect(page.locator("#terminal")).toContainText("Escape character is '^]'.");
   await expect(page.getByRole("link", { name: "Durable MOO on GitHub (opens in a new tab)" })).toHaveAttribute("href", "https://github.com/celso/durable-moo");
   await expect(page.getByText("A WORLD AT THE EDGE")).toHaveCount(0);

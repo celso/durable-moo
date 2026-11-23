@@ -67,7 +67,7 @@ publicly.** Plain telnet does not encrypt passwords or commands.
 ### Browser terminal
 
 The page connects automatically with a cosmetic telnet-style startup transcript
-using the page's hostname. The real connection is a same-origin WebSocket, not
+using `localhost`. The real connection is a same-origin WebSocket, not
 a browser TCP connection or a DNS lookup of the displayed telnet destination.
 Click inside the terminal and type directly at the cursor, just like the CLI.
 Press Enter to send a line. Arrow keys, Home/End, Backspace/Delete, Ctrl+U/K/W,
