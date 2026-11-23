@@ -1,0 +1,8 @@
+LambdaCore-17May04.db
+
+Source: https://lambda.moo.mud.org/pub/MOO/LambdaCore-17May04.db
+Published: 2004-05-17
+SHA-256: e453a0d4f837db9969e2fa00250c3a58aafcf0d843d96495c1dd81924ebf4747
+
+This is the canonical database served as LambdaCore-latest.db by the official
+LambdaMOO distribution site.

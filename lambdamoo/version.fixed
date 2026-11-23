@@ -1,0 +1,6 @@
+moo_MAJOR='1'
+moo_MINOR='9'
+moo_RELEASE='0'
+moo_EXT='alpha'
+moo_UHASH_RELEASE=''
+moo_DEFSRC='DEF(commit,"dc11b0fe6104019176c3f3ac1ef181bc664b7d2f") DEF(desc,"v1.9.0alpha")'

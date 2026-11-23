@@ -1,0 +1,205 @@
+MOO_XT_DECLARE_EXTENSIONS([
+### Everything above this line is boilerplate; do not edit.
+
+##==================
+%%extension unicode
+##==================
+  %disabled
+  %? Character set:
+
+  --enable- unicode = KWD,..
+    %?- use original ASCII charset
+    %?  support unicode
+
+  %cdefine UNICODE_%s
+
+  %option strings
+    %alt strs
+    %alt core
+    %?  in STR values and nonbinary connections
+  %option numbers
+    %alt nums
+    %?  in numeric constants
+    %implies strs
+  %option identifiers
+    %alt ids
+    %?  in variable names
+    %implies strs
+  %option_set code = ids,nums
+  %option_set all  = code
+  %option_set yes  = strs
+
+  XT_CSRCS = utf.c
+
+  %require uclib
+    --with- uclib = LIB,..
+      %?   choose Unicode character data source:
+      %?*  (gnu=unistring, icu, ucd)
+
+    %cdefine UNICODE_DATA UD_%s
+
+    %lib unistring GNU
+      %alt gnu
+      %ac AC_SEARCH_LIBS([[unicode_character_name]], [[unistring]], [%USE%])
+    %lib icu
+      %ac MOO_LIB_ICUUC([%USE%])
+    %lib ucd
+      %ac AC_SEARCH_LIBS([[unicode_character_data]], [[ucd]], [%USE%])
+      %build
+        --with- ucdpath = DIR
+          %?  use specified ucd build as uclib
+
+        %dirvar ucd_dir
+        CPPFLAGS = -I$(ucd_dir)
+        XT_LOBJS = $(ucd_dir)/libucd.a
+
+        %make <<END_UCD_MAKE
+$(ucd_dir)/libucd.a:
+	$(MAKE) -C $(ucd_dir) libucd.a
+
+$(ucd_dir)/ucd.h:
+	$(MAKE) -C $(ucd_dir) ucd.h
+
+utf-ctype.o: $(ucd_dir)/ucd.h
+END_UCD_MAKE
+
+##=================
+%%extension regexp
+##=================
+  %? Regular Expressions:
+
+  %require relib
+    --with- relib = LIB,..
+      %?  choose RE engine (ylo,pcre)
+
+    # yes, this is a hack:
+    %ac_yes AS_IF([[$moo_xt_do_unicode]], [%LIBS%[=pcre]], [%LIBS%[=ylo]])
+
+    %lib ylo
+      XT_CSRCS = regexpr.c pattern_ylo.c
+      XT_HDRS = regexpr.h
+    %lib pcre
+      XT_CSRCS = pattern_pcre.c
+      %ac <<END
+MOO_LIB_PCRE1([%USE%],
+  [%FAIL%[="PCRE library not found (must be PCRE1, not PCRE2;
+   use 'apt-get install libpcre3-dev' in Debian or Ubuntu;
+   Fedora, Red Hat, MacOS homebrew all have 'pcre' packages)"]],
+  [%FAIL%[="-lpcre cannot be used:  This PCRE1 library lacks
+   either support for UTF-8 or for Unicode character properties.
+   We need at least version 8."]])
+END
+
+##==============
+%%extension xml
+##==============
+  %disabled
+  %? XML:
+
+  --enable- xml
+    %? add xml parsing builtins
+
+  XT_CSRCS = ext-xml.c
+
+  %require xmllib
+#    --with- xmllib = LIB,..
+#      %? xml parser library
+
+#    %lib xml2 XML_LIBXML
+#      %ac AC_SEARCH_LIBS([[xmlParseDocument]], [[xml2]], [%USE%])
+
+    %lib expat EXPAT_XML
+      %ac AC_SEARCH_LIBS([[XML_Parse]], [[expat]], [%USE%])
+      %build
+        --with- expatpath = DIR
+          %?  use this expat build
+
+        %dirvar expat_dir
+        %ac <<END
+AS_SET_CATFILE([[moo_h_]], [%DIR%], [[expat.h]])
+AS_IF([[test -r "$moo_h_"]],[],
+  AC_DEFINE([EXPAT_XML_1_2_OR_BEFORE]))
+END
+        CPPFLAGS = -I$(expat_dir)
+        XT_LOBJS = $(expat_dir)/xmlparse/libexpat.a
+
+        %make <<END
+$(expat_dir)/xmlparse/libexpat.a:
+	$(MAKE) -C $(expat_dir) xmlparse/libexpat.a
+END
+
+##================
+%%extension waifs
+##================
+  %disabled
+  %? Waifs:
+
+  --enable- waifs = KWD,..
+    %?  lightweight object (WAIF) datatype
+
+  XT_CSRCS = waif.c
+
+  %option core WAIF_CORE
+    %?  property and verb syntax only
+
+  %option dict WAIF_DICT
+    %?  add array syntax
+    %implies core
+
+  %option_set all = dict
+  %option_set yes = dict
+
+
+### Next line is boilerplate; do not edit.
+],,,,,,,,[ end of extension declarations ],,,,,,,,
+
+MOO_DECLARE_OPTIONS(
+
+ [[UNICODE_IDENTIFIERS],  [bool], no,  [allow Unicode in identifiers]],
+ [[UNICODE_NUMBERS],      [bool], no,  [allow Unicode in numeric constants]],
+
+ [[WAIF_DICT],            [bool], no,  [array syntax for WAIFs]],
+)
+
+
+# MOO_LIB_ICUUC( <IF-FOUND>, <IF-NOT-FOUND> )
+#
+AC_DEFUN([MOO_LIB_ICUUC],
+[AC_CACHE_CHECK([[for icu being installed]],[moo_cv_icuuc_lib],[[
+_moo_save_libs=$LIBS
+moo_cv_icuuc_lib=
+LIBS="-licuuc $_moo_save_libs"]
+AC_LINK_IFELSE([AC_LANG_PROGRAM(
+  [[@%:@include <unicode/uchar.h>]],
+  [[UChar32 c; int j = u_charDigitValue(c);]])],[[
+  moo_cv_icuuc_lib=yes
+]],[[
+  moo_cv_icuuc_lib=no
+]])
+LIBS=$_moo_save_libs])
+AS_IF([[test "$moo_cv_icuuc_lib" = yes]],[[
+  LIBS="-licuuc $LIBS"]
+  $1],[$2])])
+
+# MOO_LIB_PCRE1( <IF-FOUND>, <IF-NOT-FOUND>, <IF-BROKEN> )
+#
+AC_DEFUN([MOO_LIB_PCRE1],
+[AC_CHECK_LIB([pcre], [pcre_exec], [
+AC_CACHE_CHECK([[whether -lpcre was built with required features]],
+  [moo_lib_cv_pcre_utf8],
+[[_moo_save_libs=$LIBS
+LIBS="-lpcre $LIBS"]
+AC_RUN_IFELSE([AC_LANG_PROGRAM([[@%:@ include <pcre.h>]],[[
+  int have_utf8, have_props;
+  pcre_config(PCRE_CONFIG_UTF8, &have_utf8);
+  pcre_config(PCRE_CONFIG_UNICODE_PROPERTIES, &have_props);
+  return (have_utf8 && have_props) ? 0 : 1;
+]])], [[moo_lib_cv_pcre_utf8=yes]], [[moo_lib_cv_pcre_utf8=no]])[
+LIBS=$_moo_save_libs]])
+AS_IF([[test $moo_lib_cv_pcre_utf8 = yes]],[[
+  LIBS="-lpcre $LIBS"]
+  $1], [$3])], [[moo_lib_cv_pcre_utf8=no]
+$2])])
+
+### The next closing paren is boilerplate; do not edit.
+)dnl --- end of extensions.ac ---

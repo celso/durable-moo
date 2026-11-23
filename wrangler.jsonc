@@ -1,0 +1,22 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "durable-moo",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-23",
+  "connect": [{ "protocol": "tcp", "port": 7777 }],
+  "rules": [
+    { "type": "Data", "globs": ["**/*.db"], "fallthrough": true }
+  ],
+  "durable_objects": {
+    "bindings": [
+      { "name": "GAME_WORLD", "class_name": "GameWorld" }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["GameWorld"]
+    }
+  ],
+  "observability": { "enabled": true, "traces": { "enabled": true } }
+}

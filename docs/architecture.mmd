@@ -1,0 +1,24 @@
+flowchart TB
+  Client["Telnet client"] -->|"TCP :7777"| Ingress["Spectrum / local Wrangler TCP listener"]
+  Ingress --> Worker["Cloudflare Worker<br/>connect(socket)"]
+
+  subgraph GameWorld["GameWorld Durable Object"]
+    direction TB
+    Runtime["LambdaMOO WebAssembly runtime"]
+    Connections["Active player connections"]
+    Snapshots["SQLite snapshot generations"]
+  end
+
+  Worker -->|"Byte streams over RPC"| Connections
+  Connections --> Runtime
+  Runtime --> Snapshots
+
+  classDef cfClient fill:#ff5e1f,stroke:#d63c01,color:#ffffff,stroke-width:2px;
+  classDef cfEngine fill:#ffffff,stroke:#ff5e1f,color:#262626,stroke-width:1.5px;
+  classDef cfCompute fill:#e6f4ff,stroke:#0a95ff,color:#083b63,stroke-width:2px;
+  classDef cfStorage fill:#ffe6fc,stroke:#ee0ddb,color:#63005b,stroke-width:2px;
+
+  class Client cfClient;
+  class Ingress,Worker,Runtime cfEngine;
+  class Connections cfCompute;
+  class Snapshots cfStorage;

@@ -1,0 +1,22 @@
+{
+  "name": "durable-moo",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.5.2",
+  "scripts": {
+    "build:wasm": "./scripts/build-wasm.sh",
+    "check:wasm": "node scripts/smoke-wasm.mjs",
+    "check": "tsc --noEmit && tsx --test tests/*.test.ts && node scripts/smoke-wasm.mjs",
+    "check:worker": "wrangler deploy --dry-run",
+    "deploy": "pnpm run build:wasm && pnpm run check && wrangler deploy",
+    "dev": "sh dev.sh",
+    "check:tcp": "node scripts/smoke-tcp.mjs",
+    "types": "wrangler types"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "wrangler": "4.166.0"
+  }
+}
