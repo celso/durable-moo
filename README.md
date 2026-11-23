@@ -4,8 +4,7 @@ Cloudflare now supports routing [TCP traffic to a Worker](https://developers.clo
 
 Durable MOO is [LambdaMOO](https://developers.cloudflare.com/workers/runtime-apis/handlers/connect/) running as WebAssembly in a SQLite-backed Cloudflare Durable Object,
 with native [TCP Workers](https://developers.cloudflare.com/workers/runtime-apis/handlers/connect/)
-ingress and a browser terminal. No Node networking shim, Zig proxy, or shared
-proxy token is required.
+ingress.
 
 - 🔌 Native [TCP Workers](https://developers.cloudflare.com/workers/runtime-apis/handlers/connect/) ingress for Telnet clients.
 - 🖥️ A self-hosted [Rioterm](https://github.com/raphamorim/riotermjs) browser terminal on the Worker's HTTP page.
